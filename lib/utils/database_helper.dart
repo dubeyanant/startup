@@ -258,6 +258,11 @@ class DatabaseHelper {
     row['password_hash'] = hashPassword(password);
     row.remove('id');
 
+    // Ensure founders list is stored as JSON string before insertion
+    if (row['founders'] is List) {
+      row['founders'] = jsonEncode(row['founders']);
+    }
+
     try {
       print(
         "Attempting to insert startup: ${row['name']} with email ${row['email']}",
