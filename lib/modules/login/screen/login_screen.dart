@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:start_invest/provider/user_type_provider.dart';
+import 'package:start_invest/modules/login/provider/user_type_provider.dart';
 import 'package:start_invest/modules/home/screen/home_screen.dart';
 
 final isLoginProvider = StateProvider<bool>((ref) => false);

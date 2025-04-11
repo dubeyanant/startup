@@ -1,38 +1,23 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 
-import 'package:start_invest/models/startup_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:start_invest/modules/home/provider/startup_data_provider.dart';
 import 'package:start_invest/modules/home/widgets/startup_card.dart';
 
-class OverviewWidget extends StatelessWidget {
+class OverviewWidget extends ConsumerWidget {
   const OverviewWidget({super.key});
 
-  Future<List<StartupModel>> loadStartupData() async {
-    final String jsonString = await rootBundle.loadString(
-      'assets/startup_data.json',
-    );
-    final List<dynamic> jsonList = json.decode(jsonString);
-    return jsonList.map((json) => StartupModel.fromJson(json)).toList();
-  }
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final startupListAsync = ref.watch(startupListProvider);
+
     return Scaffold(
-      body: FutureBuilder<List<StartupModel>>(
-        future: loadStartupData(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text("Error loading data: ${snapshot.error}"));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("No startups found"));
+      body: startupListAsync.when(
+        data: (startups) {
+          if (startups.isEmpty) {
+            return const Center(child: Text("No startups found!"));
           }
-
-          final startups = snapshot.data!;
-
           return SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(
               parent: BouncingScrollPhysics(),
@@ -58,6 +43,10 @@ class OverviewWidget extends StatelessWidget {
             ),
           );
         },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error:
+            (error, stackTrace) =>
+                Center(child: Text("Error loading data: $error")),
       ),
     );
   }

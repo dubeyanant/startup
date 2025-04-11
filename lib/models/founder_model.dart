@@ -1,22 +1,23 @@
-class FounderModel {
-  String name;
-  String email;
+class Founder {
+  final String name;
+  final String email;
 
-  FounderModel({required this.name, required this.email});
+  Founder({required this.name, required this.email});
 
-  factory FounderModel.fromJson(Map<String, dynamic> json) {
-    return FounderModel(
-      name: json['name'] as String,
-      email: json['email'] as String,
-    );
+  Map<String, dynamic> toMap() {
+    return {'name': name, 'email': email};
   }
 
-  Map<String, dynamic> toJson() {
-    return {'name': name, 'email': email};
+  factory Founder.fromMap(Map<String, dynamic> map) {
+    return Founder(name: map['name'], email: map['email']);
+  }
+
+  factory Founder.fromJson(Map<String, dynamic> json) {
+    return Founder(name: json['name'], email: json['email']);
   }
 
   @override
   String toString() {
-    return 'FounderModel{name: $name, email: $email}';
+    return 'Founder{name: $name, email: $email}';
   }
 }
