@@ -43,9 +43,12 @@ class DatabaseHelper {
   }
 
   Future _onCreate(Database db, int version) async {
+    print("Creating database tables...");
     await db.execute('''
       CREATE TABLE $_startupTableName (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL,
         name TEXT NOT NULL,
         tagline TEXT,
         description TEXT,
@@ -55,7 +58,7 @@ class DatabaseHelper {
         date TEXT,
         website TEXT,
         fundingGoal INTEGER,
-        founders TEXT -- Storing JSON string
+        founders TEXT -- Storing JSON string of all founders
       )
       ''');
 
@@ -78,34 +81,12 @@ class DatabaseHelper {
 
     // Populate initial data right after creating tables
     await _populateInitialData(db);
+    print("Database tables created.");
   }
 
   Future<void> _populateInitialData(Database db) async {
-    await _populateStartupData(db);
     await _populateInvestorData(db);
-  }
-
-  Future<void> _populateStartupData(Database db) async {
-    final String response = await rootBundle.loadString(
-      'assets/startup_data.json',
-    );
-    final List<dynamic> data = json.decode(response);
-
-    Batch batch = db.batch();
-    for (var startupJson in data) {
-      Startup startup = Startup.fromJson(
-        startupJson,
-      ); // Use fromJson to parse asset data
-      // Convert Startup object to map for database insertion (excluding id)
-      Map<String, dynamic> startupMap = startup.toMap();
-      startupMap.remove('id'); // Remove id as it's autoincremented
-      batch.insert(
-        _startupTableName,
-        startupMap,
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-    }
-    await batch.commit(noResult: true);
+    print("Initial investor data populated.");
   }
 
   Future<void> _populateInvestorData(Database db) async {
@@ -119,9 +100,14 @@ class DatabaseHelper {
       InvestorModel investor = InvestorModel.fromJson(investorJson);
       Map<String, dynamic> investorMap = investor.toMap();
       investorMap.remove('id');
-      // Add default password hash for initial investors from JSON
-      // Ensure email is also present in the map if it's NOT NULL in schema (it seems to be based on error)
       investorMap['password_hash'] = hashPassword('defaultPassword123!');
+      if (!investorMap.containsKey('email')) {
+        investorMap['email'] =
+            'placeholder_${DateTime.now().millisecondsSinceEpoch}@example.com';
+        print(
+          "Warning: Added placeholder email for investor: ${investorMap['name']}",
+        );
+      }
 
       batch.insert(
         _investorTableName,
@@ -130,16 +116,15 @@ class DatabaseHelper {
       );
     }
     await batch.commit(noResult: true);
+    print("Investor data population attempt complete.");
   }
 
   // Method to get all startups
   Future<List<Startup>> getAllStartups() async {
     Database db = await database;
     final List<Map<String, dynamic>> maps = await db.query(_startupTableName);
-
-    // Convert the List<Map<String, dynamic>> into a List<Startup>.
     return List.generate(maps.length, (i) {
-      return Startup.fromMap(maps[i]); // Use fromMap for database data
+      return Startup.fromMap(maps[i]);
     });
   }
 
@@ -158,19 +143,18 @@ class DatabaseHelper {
     Database db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       _investorTableName,
-      limit: 1, // Get only the first record
+      limit: 1,
     );
-
     if (maps.isNotEmpty) {
       return InvestorModel.fromMap(maps.first);
     } else {
-      return null; // Return null if no investors found
+      return null;
     }
   }
 
-  // Basic password hashing (consider a stronger algorithm like bcrypt/argon2)
+  // Basic password hashing
   String hashPassword(String password) {
-    final bytes = utf8.encode(password); // data being hashed
+    final bytes = utf8.encode(password);
     final digest = sha256.convert(bytes);
     return digest.toString();
   }
@@ -178,17 +162,16 @@ class DatabaseHelper {
   // Insert a newly signed-up investor
   Future<int> insertNewInvestor(Map<String, dynamic> row) async {
     Database db = await database;
-
-    // Hash the password before inserting
     if (row.containsKey('password') && row['password'] != null) {
       row['password_hash'] = hashPassword(row['password'] as String);
-      row.remove('password'); // Don't store the plain password
+      row.remove('password');
     } else {
-      // Handle error: password is required for new investor
       throw ArgumentError('Password is required for inserting a new investor.');
     }
+    if (!row.containsKey('email') || row['email'] == null) {
+      throw ArgumentError('Email is required for inserting a new investor.');
+    }
 
-    // Ensure lists are stored as JSON strings
     if (row['investmentFocus'] is List) {
       row['investmentFocus'] = jsonEncode(row['investmentFocus']);
     }
@@ -196,21 +179,56 @@ class DatabaseHelper {
       row['pastInvestments'] = jsonEncode(row['pastInvestments']);
     }
 
-    // Remove fields not in the schema if they exist in the map by mistake
-    // (e.g., if the map was created directly from a model with extra fields)
-    // Although in our current flow from InvestorDetailsScreen, this shouldn't be an issue.
-
-    // Perform the insertion
     try {
       return await db.insert(
         _investorTableName,
         row,
-        conflictAlgorithm:
-            ConflictAlgorithm.fail, // Fail if email is not unique
+        conflictAlgorithm: ConflictAlgorithm.fail,
       );
     } catch (e) {
       print("Error inserting new investor: $e");
-      // Rethrow or handle specific errors (like UNIQUE constraint failure)
+      if (e.toString().contains('UNIQUE constraint failed')) {
+        throw Exception('Email already exists.');
+      }
+      rethrow;
+    }
+  }
+
+  // Insert a newly signed-up startup
+  Future<int> insertNewStartup(Startup startup, String password) async {
+    Database db = await database;
+    Map<String, dynamic> row = startup.toMap();
+
+    String email;
+    if (startup.founders.isNotEmpty &&
+        startup.founders.first.email.isNotEmpty) {
+      email = startup.founders.first.email;
+    } else {
+      throw ArgumentError(
+        'Startup must have at least one founder with a valid email for signup.',
+      );
+    }
+
+    row['email'] = email;
+    row['password_hash'] = hashPassword(password);
+    row.remove('id');
+
+    try {
+      print(
+        "Attempting to insert startup: ${row['name']} with email ${row['email']}",
+      );
+      int id = await db.insert(
+        _startupTableName,
+        row,
+        conflictAlgorithm: ConflictAlgorithm.fail,
+      );
+      print("Startup insertion successful, ID: $id");
+      return id;
+    } catch (e) {
+      print("Error inserting new startup: $e");
+      if (e.toString().contains('UNIQUE constraint failed')) {
+        throw Exception('Email already exists.');
+      }
       rethrow;
     }
   }
@@ -224,10 +242,29 @@ class DatabaseHelper {
       whereArgs: [email],
       limit: 1,
     );
-
     if (maps.isNotEmpty) {
       return InvestorModel.fromMap(maps.first);
     } else {
+      return null;
+    }
+  }
+
+  // Fetch a startup by their primary login email
+  Future<Startup?> fetchStartupByEmail(String email) async {
+    Database db = await database;
+    print("Fetching startup by email: $email");
+    final List<Map<String, dynamic>> maps = await db.query(
+      _startupTableName,
+      where: 'email = ?',
+      whereArgs: [email],
+      limit: 1,
+    );
+
+    if (maps.isNotEmpty) {
+      print("Startup found for email: $email");
+      return Startup.fromMap(maps.first);
+    } else {
+      print("Startup not found for email: $email");
       return null;
     }
   }
@@ -240,36 +277,51 @@ class DatabaseHelper {
     Database db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       _investorTableName,
-      columns: [
-        'id',
-        'email',
-        'password_hash',
-        'name',
-        'location',
-        'tagline',
-        'minInvestment',
-        'maxInvestment',
-        'bio',
-        'investmentFocus',
-        'pastInvestments',
-        'activeSince',
-      ], // Explicitly list columns
+      where: 'email = ?',
+      whereArgs: [email],
+      limit: 1,
+    );
+    if (maps.isNotEmpty) {
+      final userMap = maps.first;
+      final storedHash = userMap['password_hash'] as String?;
+      final providedPasswordHash = hashPassword(password);
+      if (storedHash != null && storedHash == providedPasswordHash) {
+        return InvestorModel.fromMap(userMap);
+      }
+    }
+    return null;
+  }
+
+  // Verify startup login credentials
+  Future<Startup?> verifyStartupLogin(String email, String password) async {
+    Database db = await database;
+    print("Verifying startup login for email: $email");
+    final List<Map<String, dynamic>> maps = await db.query(
+      _startupTableName,
       where: 'email = ?',
       whereArgs: [email],
       limit: 1,
     );
 
     if (maps.isNotEmpty) {
-      final userMap = maps.first;
-      final storedHash = userMap['password_hash'] as String?;
-      final providedPasswordHash = hashPassword(password);
+      final startupMap = maps.first;
+      if (startupMap.containsKey('password_hash') &&
+          startupMap['password_hash'] != null) {
+        final storedHash = startupMap['password_hash'] as String;
+        final providedPasswordHash = hashPassword(password);
 
-      if (storedHash != null && storedHash == providedPasswordHash) {
-        // Passwords match, return the investor model
-        return InvestorModel.fromMap(userMap);
+        if (storedHash == providedPasswordHash) {
+          print("Startup login successful for email: $email");
+          return Startup.fromMap(startupMap);
+        } else {
+          print("Startup password mismatch for email: $email");
+        }
+      } else {
+        print("Password hash not found or is null for startup email: $email");
       }
+    } else {
+      print("Startup email not found: $email");
     }
-    // Email not found or password doesn't match
     return null;
   }
 
@@ -288,55 +340,21 @@ class DatabaseHelper {
     }
   }
 
-  // Fetch a startup by the email of its first founder
-  // NOTE: This is inefficient and relies on the first founder's email.
-  // Consider adding a dedicated email/user link to the Startup model.
-  Future<Startup?> fetchStartupByEmail(String email) async {
-    Database db = await database;
-    final List<Map<String, dynamic>> maps = await db.query(_startupTableName);
-
-    for (var map in maps) {
-      try {
-        List<dynamic> founderList = jsonDecode(map['founders']);
-        if (founderList.isNotEmpty) {
-          Map<String, dynamic> firstFounder = founderList.first;
-          if (firstFounder.containsKey('email') &&
-              firstFounder['email'] == email) {
-            return Startup.fromMap(map);
-          }
-        }
-      } catch (e) {
-        print("Error parsing founders for startup ID ${map['id']}: $e");
-        // Continue to the next startup if parsing fails for one
-      }
-    }
-    return null; // No startup found with the first founder having this email
-  }
-
-  // Delete a startup by the email of its first founder
-  // NOTE: This relies on the first founder's email.
+  // Delete a startup by their primary login email
   Future<int> deleteStartupByEmail(String email) async {
     Database db = await database;
-    Startup? startupToDelete = await fetchStartupByEmail(
-      email,
-    ); // Find the startup first
-
-    if (startupToDelete != null && startupToDelete.id != null) {
-      try {
-        return await db.delete(
-          _startupTableName,
-          where: 'id = ?', // Delete by ID once found
-          whereArgs: [startupToDelete.id],
-        );
-      } catch (e) {
-        print("Error deleting startup with ID ${startupToDelete.id}: $e");
-        rethrow;
-      }
-    } else {
-      print("Startup not found for deletion with email: $email");
-      return 0; // Indicate no rows deleted
+    print("Deleting startup by email: $email");
+    try {
+      int deletedRows = await db.delete(
+        _startupTableName,
+        where: 'email = ?',
+        whereArgs: [email],
+      );
+      print("Deleted $deletedRows startup rows for email: $email");
+      return deletedRows;
+    } catch (e) {
+      print("Error deleting startup: $e");
+      rethrow;
     }
   }
-
-  // Add other CRUD methods here if needed (e.g., insert, update, delete)
 }

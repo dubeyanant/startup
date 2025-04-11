@@ -34,6 +34,7 @@ class StartupCard extends StatelessWidget {
           ],
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               spacing: 8,

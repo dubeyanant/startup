@@ -7,6 +7,7 @@ import 'package:start_invest/modules/login/provider/login_provider.dart';
 import 'package:start_invest/modules/login/provider/user_type_provider.dart';
 import 'package:start_invest/modules/home/screen/home_screen.dart';
 import 'package:start_invest/modules/login/screen/investor_details_screen.dart';
+import 'package:start_invest/modules/login/screen/startup_details_screen.dart';
 import 'package:start_invest/utils/database_helper.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -191,19 +192,34 @@ class _HomeScreenState extends ConsumerState<LoginScreen> {
                           }
                         }
                       } else {
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Startup login not implemented yet',
+                        final startup = await _dbHelper.verifyStartupLogin(
+                          email,
+                          password,
+                        );
+                        if (startup != null) {
+                          ref.read(loggedInUserEmailProvider.notifier).state =
+                              email;
+                          if (mounted) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const HomeScreen(),
                               ),
-                            ),
-                          );
+                            );
+                          }
+                        } else {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Invalid email or password'),
+                              ),
+                            );
+                          }
                         }
                       }
                     } else {
                       if (userType == UserType.investor) {
-                        Navigator.pushReplacement(
+                        Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder:
@@ -214,21 +230,16 @@ class _HomeScreenState extends ConsumerState<LoginScreen> {
                           ),
                         );
                       } else {
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Startup sign-up placeholder - Navigating Home',
-                              ),
-                            ),
-                          );
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const HomeScreen(),
-                            ),
-                          );
-                        }
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => StartupDetailsScreen(
+                                  email: email,
+                                  password: password,
+                                ),
+                          ),
+                        );
                       }
                     }
                   }

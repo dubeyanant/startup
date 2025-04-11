@@ -199,31 +199,33 @@ class _StartupDetailCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                GestureDetector(
-                  onTap: () {
-                    final Uri url = Uri.parse(startup.website);
-                    launchUrl(url, mode: LaunchMode.externalApplication);
-                  },
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.data_usage_sharp,
-                        color: Colors.blue,
-                        size: 14,
-                      ),
-                      const SizedBox(width: 2),
-                      Text(
-                        startup.website,
-                        style: TextStyle(
-                          fontSize: 13,
+                if (startup.website.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () {
+                      final Uri url = Uri.parse(startup.website);
+                      launchUrl(url, mode: LaunchMode.externalApplication);
+                    },
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.data_usage_sharp,
                           color: Colors.blue,
-                          height: 1,
+                          size: 14,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 2),
+                        Text(
+                          startup.website,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.blue,
+                            height: 1,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                ],
                 if (isFromProfile) ...[
                   const SizedBox(height: 8),
                   Row(
