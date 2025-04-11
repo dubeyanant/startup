@@ -1,19 +1,21 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:start_invest/provider/user_type_provider.dart';
+import 'package:start_invest/modules/home/screen/home_screen.dart';
 
 final isLoginProvider = StateProvider<bool>((ref) => false);
 
-class HomeScreen extends ConsumerStatefulWidget {
-  const HomeScreen({super.key});
+class LoginScreen extends ConsumerStatefulWidget {
+  const LoginScreen({super.key});
 
   @override
-  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<LoginScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
 
   late TextEditingController _passwordController;
@@ -46,7 +48,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           key: _formKey,
           child: Column(
             children: [
-              Text(isLogin ? "Login" : "Sign Up"),
+              GestureDetector(
+                onTap: () {
+                  if (kDebugMode) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const HomeScreen(),
+                      ),
+                    );
+                  }
+                },
+                child: Text(isLogin ? "Login" : "Sign Up"),
+              ),
               TextFormField(
                 decoration: const InputDecoration(labelText: "Email"),
                 validator: (value) {
@@ -139,14 +153,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          isLogin ? 'Logging In...' : 'Signing Up...',
-                        ),
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const HomeScreen(),
                       ),
                     );
-                    // TODO: Implement actual login/signup logic here
                   }
                 },
                 child: Text(isLogin ? "Login" : "Sign Up"),
