@@ -1,0 +1,180 @@
+[
+  {
+    "name": "GreenTech Solutions",
+    "tagline": "Sustainable energy for everyone",
+    "description": "We develop affordable solar panels with 30% more efficiency than the current market leaders, using our patented energy conversion technology.",
+    "sector": "Clean Energy",
+    "funding": "Seed",
+    "location": "Boston, MA",
+    "date": "Over 1 year ago",
+    "website": "https://greentechsolutions.com",
+    "fundingGoal": 2000000,
+    "founders": [
+      {
+        "name": "Alice Johnson",
+        "email": "alicejohnson@gts.com"
+      },
+      {
+        "name": "Sophia Williams",
+        "email": "sophiawilliams@gts.com"
+      }
+    ]
+  },
+  {
+    "name": "NeuroLink AI",
+    "tagline": "Bridging brains and machines",
+    "description": "Building brain-computer interface devices that help people with neurological disorders regain motor functions.",
+    "sector": "HealthTech",
+    "funding": "Series A",
+    "location": "San Francisco, CA",
+    "date": "6 months ago",
+    "website": "https://neurolink.ai",
+    "fundingGoal": 5000000,
+    "founders": [
+      {
+        "name": "Dr. Martin Lin",
+        "email": "mlin@neurolink.ai"
+      }
+    ]
+  },
+  {
+    "name": "Farmify",
+    "tagline": "The future of farming is digital",
+    "description": "We provide precision agriculture tools that use IoT and AI to optimize crop yields and reduce water usage.",
+    "sector": "AgriTech",
+    "funding": "Pre-Seed",
+    "location": "Des Moines, IA",
+    "date": "2 years ago",
+    "website": "https://farmify.ag",
+    "fundingGoal": 750000,
+    "founders": [
+      {
+        "name": "Rachel Thompson",
+        "email": "rachel@farmify.ag"
+      }
+    ]
+  },
+  {
+    "name": "LoopCart",
+    "tagline": "Grocery shopping, simplified",
+    "description": "LoopCart is a mobile platform that offers curated grocery subscriptions from local producers with delivery in under 2 hours.",
+    "sector": "E-commerce",
+    "funding": "Seed",
+    "location": "Austin, TX",
+    "date": "8 months ago",
+    "website": "https://loopcart.com",
+    "fundingGoal": 1500000,
+    "founders": [
+      {
+        "name": "Aiden Clark",
+        "email": "aiden@loopcart.com"
+      }
+    ]
+  },
+  {
+    "name": "AetherMaps",
+    "tagline": "Smarter skies, safer flights",
+    "description": "Developing AI-powered air traffic mapping solutions to prevent collisions and optimize flight paths for commercial drones.",
+    "sector": "Aerospace",
+    "funding": "Series B",
+    "location": "Denver, CO",
+    "date": "1 year ago",
+    "website": "https://aethermaps.io",
+    "fundingGoal": 8000000,
+    "founders": [
+      {
+        "name": "Nina Patel",
+        "email": "nina@aethermaps.io"
+      }
+    ]
+  },
+  {
+    "name": "BioByte",
+    "tagline": "Rewriting the code of life",
+    "description": "A synthetic biology startup engineering bacteria to produce rare medicinal compounds at industrial scale.",
+    "sector": "Biotech",
+    "funding": "Series A",
+    "location": "Cambridge, UK",
+    "date": "3 years ago",
+    "website": "https://biobyte.bio",
+    "fundingGoal": 4000000,
+    "founders": [
+      {
+        "name": "Dr. Marcus Hughes",
+        "email": "marcus@biobyte.bio"
+      }
+    ]
+  },
+  {
+    "name": "Finlytics",
+    "tagline": "Finance meets intelligence",
+    "description": "Using machine learning to help SMEs automate accounting and forecast cash flow with remarkable accuracy.",
+    "sector": "FinTech",
+    "funding": "Seed",
+    "location": "Toronto, Canada",
+    "date": "9 months ago",
+    "website": "https://finlytics.ai",
+    "fundingGoal": 1200000,
+    "founders": [
+      {
+        "name": "Olivia Grant",
+        "email": "olivia@finlytics.ai"
+      }
+    ]
+  },
+  {
+    "name": "EduSpark",
+    "tagline": "Igniting the next generation of learners",
+    "description": "A gamified learning platform tailored for K-12 students, integrating personalized AI tutors.",
+    "sector": "EdTech",
+    "funding": "Series A",
+    "location": "New York, NY",
+    "date": "Over 2 years ago",
+    "website": "https://eduspark.app",
+    "fundingGoal": 3000000,
+    "founders": [
+      {
+        "name": "James Carter",
+        "email": "james@eduspark.app"
+      },
+      {
+        "name": "Mei Wong",
+        "email": "mei@eduspark.app"
+      }
+    ]
+  },
+  {
+    "name": "EcoTrace",
+    "tagline": "Trace your carbon, make a change",
+    "description": "Blockchain-based platform that tracks and verifies companies' carbon emissions in real-time.",
+    "sector": "ClimateTech",
+    "funding": "Seed",
+    "location": "Berlin, Germany",
+    "date": "1.5 years ago",
+    "website": "https://ecotrace.io",
+    "fundingGoal": 2500000,
+    "founders": [
+      {
+        "name": "Tobias Richter",
+        "email": "tobias@ecotrace.io"
+      }
+    ]
+  },
+  {
+    "name": "SafePass",
+    "tagline": "Secure identity, everywhere",
+    "description": "Developing decentralized identity verification systems for online and physical access control.",
+    "sector": "Cybersecurity",
+    "funding": "Series A",
+    "location": "Seattle, WA",
+    "date": "7 months ago",
+    "website": "https://safepass.id",
+    "fundingGoal": 3500000,
+    "founders": [
+      {
+        "name": "Diana Moore",
+        "email": "diana@safepass.id"
+      }
+    ]
+  }
+]

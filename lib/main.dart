@@ -11,6 +11,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: LoginScreen());
+    return MaterialApp(
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.white,
+          primary: Colors.purple,
+          secondary: Colors.white,
+        ),
+        scaffoldBackgroundColor: Colors.grey[50],
+      ),
+      home: LoginScreen(),
+    );
   }
 }
