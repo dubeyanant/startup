@@ -19,6 +19,7 @@ class InfoPill extends StatelessWidget {
         color: backgroundColor,
         borderRadius: BorderRadius.circular(32),
       ),
+      margin: EdgeInsets.only(right: 4),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       child: Center(
         child: Text(

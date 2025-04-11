@@ -85,7 +85,6 @@ class StartupCard extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Row(
-              spacing: 8,
               children: [
                 InfoPill(
                   info: startup.sector,

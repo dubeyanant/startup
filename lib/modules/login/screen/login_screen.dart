@@ -51,7 +51,7 @@ class _HomeScreenState extends ConsumerState<LoginScreen> {
               GestureDetector(
                 onTap: () {
                   if (kDebugMode) {
-                    Navigator.push(
+                    Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: (context) => const HomeScreen(),
