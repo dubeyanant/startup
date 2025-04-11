@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 // ignore: depend_on_referenced_packages
@@ -33,19 +34,11 @@ class DatabaseHelper {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, _dbName);
 
-    // Check if the database exists
-    bool dbExists = await databaseExists(path);
-
     Database db = await openDatabase(
       path,
       version: _dbVersion,
       onCreate: _onCreate,
     );
-
-    // Populate with initial data only if the DB was just created
-    if (!dbExists) {
-      await _populateInitialData(db);
-    }
 
     return db;
   }
@@ -70,8 +63,9 @@ class DatabaseHelper {
     await db.execute('''
        CREATE TABLE $_investorTableName (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL,
         name TEXT NOT NULL,
-        email TEXT,
         location TEXT,
         tagline TEXT,
         minInvestment INTEGER,
@@ -82,6 +76,9 @@ class DatabaseHelper {
         activeSince TEXT
        )
       ''');
+
+    // Populate initial data right after creating tables
+    await _populateInitialData(db);
   }
 
   Future<void> _populateInitialData(Database db) async {
@@ -123,6 +120,10 @@ class DatabaseHelper {
       InvestorModel investor = InvestorModel.fromJson(investorJson);
       Map<String, dynamic> investorMap = investor.toMap();
       investorMap.remove('id');
+      // Add default password hash for initial investors from JSON
+      // Ensure email is also present in the map if it's NOT NULL in schema (it seems to be based on error)
+      investorMap['password_hash'] = hashPassword('defaultPassword123!');
+
       batch.insert(
         _investorTableName,
         investorMap,
@@ -165,6 +166,126 @@ class DatabaseHelper {
       return InvestorModel.fromMap(maps.first);
     } else {
       return null; // Return null if no investors found
+    }
+  }
+
+  // Basic password hashing (consider a stronger algorithm like bcrypt/argon2)
+  String hashPassword(String password) {
+    final bytes = utf8.encode(password); // data being hashed
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
+  // Insert a newly signed-up investor
+  Future<int> insertNewInvestor(Map<String, dynamic> row) async {
+    Database db = await database;
+
+    // Hash the password before inserting
+    if (row.containsKey('password') && row['password'] != null) {
+      row['password_hash'] = hashPassword(row['password'] as String);
+      row.remove('password'); // Don't store the plain password
+    } else {
+      // Handle error: password is required for new investor
+      throw ArgumentError('Password is required for inserting a new investor.');
+    }
+
+    // Ensure lists are stored as JSON strings
+    if (row['investmentFocus'] is List) {
+      row['investmentFocus'] = jsonEncode(row['investmentFocus']);
+    }
+    if (row['pastInvestments'] is List) {
+      row['pastInvestments'] = jsonEncode(row['pastInvestments']);
+    }
+
+    // Remove fields not in the schema if they exist in the map by mistake
+    // (e.g., if the map was created directly from a model with extra fields)
+    // Although in our current flow from InvestorDetailsScreen, this shouldn't be an issue.
+
+    // Perform the insertion
+    try {
+      return await db.insert(
+        _investorTableName,
+        row,
+        conflictAlgorithm:
+            ConflictAlgorithm.fail, // Fail if email is not unique
+      );
+    } catch (e) {
+      print("Error inserting new investor: $e");
+      // Rethrow or handle specific errors (like UNIQUE constraint failure)
+      rethrow;
+    }
+  }
+
+  // Fetch an investor by their email
+  Future<InvestorModel?> fetchInvestorByEmail(String email) async {
+    Database db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      _investorTableName,
+      where: 'email = ?',
+      whereArgs: [email],
+      limit: 1,
+    );
+
+    if (maps.isNotEmpty) {
+      return InvestorModel.fromMap(maps.first);
+    } else {
+      return null;
+    }
+  }
+
+  // Verify investor login credentials
+  Future<InvestorModel?> verifyInvestorLogin(
+    String email,
+    String password,
+  ) async {
+    Database db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      _investorTableName,
+      columns: [
+        'id',
+        'email',
+        'password_hash',
+        'name',
+        'location',
+        'tagline',
+        'minInvestment',
+        'maxInvestment',
+        'bio',
+        'investmentFocus',
+        'pastInvestments',
+        'activeSince',
+      ], // Explicitly list columns
+      where: 'email = ?',
+      whereArgs: [email],
+      limit: 1,
+    );
+
+    if (maps.isNotEmpty) {
+      final userMap = maps.first;
+      final storedHash = userMap['password_hash'] as String?;
+      final providedPasswordHash = hashPassword(password);
+
+      if (storedHash != null && storedHash == providedPasswordHash) {
+        // Passwords match, return the investor model
+        return InvestorModel.fromMap(userMap);
+      }
+    }
+    // Email not found or password doesn't match
+    return null;
+  }
+
+  // Delete an investor by email
+  Future<int> deleteInvestorByEmail(String email) async {
+    Database db = await database;
+    try {
+      return await db.delete(
+        _investorTableName,
+        where: 'email = ?',
+        whereArgs: [email],
+      );
+    } catch (e) {
+      print("Error deleting investor: $e");
+      rethrow;
     }
   }
 

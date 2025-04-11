@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:start_invest/modules/home/widgets/investor_profile_card.dart';
+import 'package:start_invest/modules/login/provider/login_provider.dart';
 import 'package:start_invest/modules/login/screen/login_screen.dart';
 import 'package:start_invest/modules/profile/provider/profile_provider.dart';
+import 'package:start_invest/utils/database_helper.dart';
+import 'package:start_invest/modules/home/provider/investor_data_provider.dart';
 
 class ProfileWidget extends ConsumerWidget {
   const ProfileWidget({super.key});
@@ -11,6 +15,7 @@ class ProfileWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final investorAsync = ref.watch(currentInvestorProvider);
+    final dbHelper = DatabaseHelper();
 
     return Scaffold(
       body: investorAsync.when(
@@ -46,14 +51,94 @@ class ProfileWidget extends ConsumerWidget {
                     icon: Icons.delete_outline,
                     color: Colors.red,
                     textColor: Colors.white,
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Delete account tapped (not implemented)',
+                    onTap: () async {
+                      final loggedInEmail = ref.read(loggedInUserEmailProvider);
+
+                      if (loggedInEmail == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Error: Not logged in.'),
                           ),
-                        ),
+                        );
+                        return;
+                      }
+
+                      final confirmed = await showDialog<bool>(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Delete Account?'),
+                            content: const Text(
+                              'Are you sure you want to permanently delete your account?',
+                            ),
+                            actions: <Widget>[
+                              TextButton(
+                                child: const Text('Cancel'),
+                                onPressed:
+                                    () => Navigator.of(context).pop(false),
+                              ),
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.red,
+                                ),
+                                child: const Text('Delete'),
+                                onPressed:
+                                    () => Navigator.of(context).pop(true),
+                              ),
+                            ],
+                          );
+                        },
                       );
+
+                      if (confirmed == true) {
+                        try {
+                          final rowsDeleted = await dbHelper
+                              .deleteInvestorByEmail(loggedInEmail);
+
+                          if (rowsDeleted > 0) {
+                            ref.read(loggedInUserEmailProvider.notifier).state =
+                                null;
+                            ref.invalidate(investorListProvider);
+                            if (context.mounted) {
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const LoginScreen(),
+                                ),
+                                (Route<dynamic> route) => false,
+                              );
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Account deleted successfully.',
+                                  ),
+                                ),
+                              );
+                            }
+                          } else {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Error: Account not found or could not be deleted.',
+                                  ),
+                                ),
+                              );
+                            }
+                          }
+                        } catch (e) {
+                          print("Error during account deletion: $e");
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Error deleting account: ${e.toString()}',
+                                ),
+                              ),
+                            );
+                          }
+                        }
+                      }
                     },
                   ),
                 ],

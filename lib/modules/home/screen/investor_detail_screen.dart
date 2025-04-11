@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:start_invest/models/investor_model.dart';
-import 'package:start_invest/modules/home/widgets/investor_card.dart';
+import 'package:start_invest/modules/home/widgets/investor_profile_card.dart';
 
 class InvestorDetailScreen extends StatelessWidget {
   const InvestorDetailScreen(this.investor, {super.key});
@@ -16,7 +16,7 @@ class InvestorDetailScreen extends StatelessWidget {
         physics: const AlwaysScrollableScrollPhysics(),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          child: InvestorCard(investor),
+          child: InvestorProfileCard(investor: investor),
         ),
       ),
     );

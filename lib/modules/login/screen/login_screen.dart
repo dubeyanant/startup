@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:start_invest/modules/login/provider/login_provider.dart';
 import 'package:start_invest/modules/login/provider/user_type_provider.dart';
 import 'package:start_invest/modules/home/screen/home_screen.dart';
-
-final isLoginProvider = StateProvider<bool>((ref) => false);
+import 'package:start_invest/modules/login/screen/investor_details_screen.dart';
+import 'package:start_invest/utils/database_helper.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -17,19 +18,23 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _dbHelper = DatabaseHelper();
 
+  late TextEditingController _emailController;
   late TextEditingController _passwordController;
   late TextEditingController _confirmPasswordController;
 
   @override
   void initState() {
     super.initState();
+    _emailController = TextEditingController();
     _passwordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
   }
 
   @override
   void dispose() {
+    _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -62,6 +67,7 @@ class _HomeScreenState extends ConsumerState<LoginScreen> {
                 child: Text(isLogin ? "Login" : "Sign Up"),
               ),
               TextFormField(
+                controller: _emailController,
                 decoration: const InputDecoration(labelText: "Email"),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -151,14 +157,80 @@ class _HomeScreenState extends ConsumerState<LoginScreen> {
                 ],
               ),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const HomeScreen(),
-                      ),
-                    );
+                    final email = _emailController.text;
+                    final password = _passwordController.text;
+                    final isLogin = ref.read(isLoginProvider);
+                    final userType = ref.read(userTypeProvider);
+
+                    if (isLogin) {
+                      if (userType == UserType.investor) {
+                        final investor = await _dbHelper.verifyInvestorLogin(
+                          email,
+                          password,
+                        );
+                        if (investor != null) {
+                          ref.read(loggedInUserEmailProvider.notifier).state =
+                              email;
+                          if (mounted) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const HomeScreen(),
+                              ),
+                            );
+                          }
+                        } else {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Invalid email or password'),
+                              ),
+                            );
+                          }
+                        }
+                      } else {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Startup login not implemented yet',
+                              ),
+                            ),
+                          );
+                        }
+                      }
+                    } else {
+                      if (userType == UserType.investor) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => InvestorDetailsScreen(
+                                  email: email,
+                                  password: password,
+                                ),
+                          ),
+                        );
+                      } else {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Startup sign-up placeholder - Navigating Home',
+                              ),
+                            ),
+                          );
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const HomeScreen(),
+                            ),
+                          );
+                        }
+                      }
+                    }
                   }
                 },
                 child: Text(isLogin ? "Login" : "Sign Up"),
@@ -167,6 +239,7 @@ class _HomeScreenState extends ConsumerState<LoginScreen> {
                 onTap: () {
                   // Clear form errors when switching modes
                   _formKey.currentState?.reset();
+                  _emailController.clear();
                   _passwordController.clear();
                   _confirmPasswordController.clear();
                   ref.read(isLoginProvider.notifier).state = !isLogin;

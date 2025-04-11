@@ -37,13 +37,14 @@ class InvestorCard extends StatelessWidget {
           ],
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ListTile(
               contentPadding: const EdgeInsets.fromLTRB(0, 0, 16, 0),
               leading: CircleAvatar(
                 backgroundColor: Colors.purple[50],
                 child: Text(
-                  "Te",
+                  "${investor.name[0].toUpperCase()}${investor.name[1]}",
                   style: TextStyle(
                     color: Colors.purple,
                     fontWeight: FontWeight.bold,
