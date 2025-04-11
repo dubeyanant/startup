@@ -1,0 +1,122 @@
+[
+  {
+    "name": "Alice Ventures",
+    "email": "contact@aliceventures.com",
+    "location": "San Francisco, CA",
+    "tagline": "Empowering the future of tech",
+    "minInvestment": 50000,
+    "maxInvestment": 500000,
+    "bio": "Alice Ventures backs early-stage tech startups with a focus on scalability and innovation.",
+    "investmentFocus": ["AI", "SaaS", "Fintech"],
+    "pastInvestments": ["StartupA", "StartupB", "StartupC"],
+    "activeSince": "2015"
+  },
+  {
+    "name": "Green Capital",
+    "email": "hello@greencapital.io",
+    "location": "Austin, TX",
+    "tagline": "Investing in a sustainable tomorrow",
+    "minInvestment": 100000,
+    "maxInvestment": 1000000,
+    "bio": "We support startups solving climate change and renewable energy issues.",
+    "investmentFocus": ["Clean Energy", "AgriTech", "Sustainability"],
+    "pastInvestments": ["EcoStartup1", "GreenHarvest", "SolarNow"],
+    "activeSince": "2012"
+  },
+  {
+    "name": "NextGen Angels",
+    "email": "team@nextgenangels.com",
+    "location": "New York, NY",
+    "tagline": "Backing the next generation of innovators",
+    "minInvestment": 25000,
+    "maxInvestment": 200000,
+    "bio": "We are a network of angel investors focused on seed rounds and mentorship.",
+    "investmentFocus": ["EdTech", "HealthTech", "Consumer Apps"],
+    "pastInvestments": ["StudyBuddy", "HealthSync", "ShopEase"],
+    "activeSince": "2018"
+  },
+  {
+    "name": "Venture Hive",
+    "email": "info@venturehive.com",
+    "location": "Seattle, WA",
+    "tagline": "Buzzing with bold ideas",
+    "minInvestment": 75000,
+    "maxInvestment": 600000,
+    "bio": "Venture Hive partners with ambitious founders to bring groundbreaking products to life.",
+    "investmentFocus": ["Robotics", "IoT", "Machine Learning"],
+    "pastInvestments": ["RoboHome", "TrackSmart", "AutoBotics"],
+    "activeSince": "2016"
+  },
+  {
+    "name": "SkyBridge Partners",
+    "email": "partners@skybridgefund.com",
+    "location": "Boston, MA",
+    "tagline": "Bridging ideas and capital",
+    "minInvestment": 150000,
+    "maxInvestment": 1200000,
+    "bio": "Our firm specializes in growth-stage investments in B2B SaaS startups.",
+    "investmentFocus": ["B2B", "SaaS", "Enterprise Software"],
+    "pastInvestments": ["SalesMate", "CRMX", "CloudLedger"],
+    "activeSince": "2010"
+  },
+  {
+    "name": "Digital Nest Capital",
+    "email": "nest@digitalnest.co",
+    "location": "Chicago, IL",
+    "tagline": "Helping startups take flight",
+    "minInvestment": 30000,
+    "maxInvestment": 300000,
+    "bio": "We believe in early support and hands-on guidance for digital-first companies.",
+    "investmentFocus": ["E-commerce", "Mobile Apps", "Web3"],
+    "pastInvestments": ["QuickCart", "InstaShop", "BlockChainly"],
+    "activeSince": "2017"
+  },
+  {
+    "name": "Nova Impact Fund",
+    "email": "impact@novafund.org",
+    "location": "Denver, CO",
+    "tagline": "Impact with intention",
+    "minInvestment": 50000,
+    "maxInvestment": 500000,
+    "bio": "Nova Impact Fund supports companies creating positive social and environmental change.",
+    "investmentFocus": ["HealthTech", "EdTech", "Social Impact"],
+    "pastInvestments": ["TeachNow", "HealthBridge", "CommunityLink"],
+    "activeSince": "2013"
+  },
+  {
+    "name": "Altura Ventures",
+    "email": "connect@alturaventures.com",
+    "location": "Miami, FL",
+    "tagline": "Elevating innovative ventures",
+    "minInvestment": 100000,
+    "maxInvestment": 1000000,
+    "bio": "Altura Ventures looks for game-changing ideas in underserved markets.",
+    "investmentFocus": ["LatAm Startups", "Blockchain", "AI"],
+    "pastInvestments": ["CryptoMarket", "DataLatam", "AIForGood"],
+    "activeSince": "2014"
+  },
+  {
+    "name": "Torchlight Capital",
+    "email": "flame@torchlightvc.com",
+    "location": "Los Angeles, CA",
+    "tagline": "Illuminating the path for founders",
+    "minInvestment": 40000,
+    "maxInvestment": 450000,
+    "bio": "We're passionate about storytelling and support media & entertainment startups.",
+    "investmentFocus": ["Media", "Streaming", "Creator Economy"],
+    "pastInvestments": ["VidPro", "StreamLab", "ContentHub"],
+    "activeSince": "2019"
+  },
+  {
+    "name": "Atlas Growth Fund",
+    "email": "invest@atlasgrowth.com",
+    "location": "Toronto, Canada",
+    "tagline": "Global vision. Local impact.",
+    "minInvestment": 80000,
+    "maxInvestment": 950000,
+    "bio": "Cross-border venture capital firm investing in scalable tech with a global outlook.",
+    "investmentFocus": ["Cross-Border Tech", "Fintech", "AI"],
+    "pastInvestments": ["GlobaPay", "AIAtlas", "TechBridge"],
+    "activeSince": "2011"
+  }
+]

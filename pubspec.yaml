@@ -24,6 +24,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/startup_data.json
+    - assets/investor_data.json
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import 'package:start_invest/modules/home/widgets/startup_profile_card.dart';
-import 'package:start_invest/models/startup_model.dart';
+import 'package:start_invest/models/investor_model.dart';
+import 'package:start_invest/modules/home/widgets/investor_card.dart';
 
-class StartupDetailScreen extends StatelessWidget {
-  const StartupDetailScreen(this.startup, {super.key});
+class InvestorDetailScreen extends StatelessWidget {
+  const InvestorDetailScreen(this.investor, {super.key});
 
-  final Startup startup;
+  final InvestorModel investor;
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +16,7 @@ class StartupDetailScreen extends StatelessWidget {
         physics: const AlwaysScrollableScrollPhysics(),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          child: StartupProfileCard(startup: startup),
+          child: InvestorCard(investor),
         ),
       ),
     );

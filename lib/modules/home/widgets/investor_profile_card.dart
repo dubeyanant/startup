@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:start_invest/models/investor_model.dart';
 
 import 'package:start_invest/modules/home/widgets/info_pill.dart';
+import 'package:start_invest/utils/currency_conversion.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class InvestorProfileCard extends StatelessWidget {
-  const InvestorProfileCard({super.key, this.isFromProfile = false});
+  const InvestorProfileCard({
+    super.key,
+    required this.investor,
+    this.isFromProfile = false,
+  });
 
   final bool isFromProfile;
+  final InvestorModel investor;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +61,7 @@ class InvestorProfileCard extends StatelessWidget {
                     backgroundColor: Colors.purple[50],
                     radius: 30,
                     child: Text(
-                      "Al",
+                      "${investor.name[0].toUpperCase()}${investor.name[1]}",
                       style: TextStyle(
                         color: Colors.purple,
                         fontWeight: FontWeight.bold,
@@ -72,11 +80,11 @@ class InvestorProfileCard extends StatelessWidget {
               children: [
                 SizedBox(height: 16),
                 Text(
-                  'Alex Taylor',
+                  investor.name,
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  "Managing Partner at Horizon Ventures",
+                  investor.tagline,
                   style: TextStyle(fontSize: 14, color: Colors.grey),
                 ),
                 SizedBox(height: 12),
@@ -91,7 +99,7 @@ class InvestorProfileCard extends StatelessWidget {
                           size: 15,
                         ),
                         Text(
-                          "San Francisco, CA",
+                          investor.location,
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.grey,
@@ -109,7 +117,7 @@ class InvestorProfileCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 2),
                         Text(
-                          "₹25Lk-₹50Lk",
+                          "${CurrencyConversion.formatCurrency(investor.minInvestment)} - ${CurrencyConversion.formatCurrency(investor.maxInvestment)}",
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.grey,
@@ -127,7 +135,7 @@ class InvestorProfileCard extends StatelessWidget {
                       Icon(Icons.mail_outline, color: Colors.grey, size: 16),
                       const SizedBox(width: 2),
                       Text(
-                        "alex@greentech.com",
+                        investor.email,
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.grey,
@@ -148,7 +156,7 @@ class InvestorProfileCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "Early stage investor with a focus on tech startups. Passionate about helping entrepreneurs succeed and building innovative products.",
+                  investor.bio,
                   style: TextStyle(
                     fontSize: 14,
                     height: 1.2,
@@ -166,23 +174,14 @@ class InvestorProfileCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Row(
-                  children: [
-                    InfoPill(
-                      info: "SaaS",
-                      color: Colors.blue,
-                      backgroundColor: Colors.blue[50]!,
-                    ),
-                    InfoPill(
-                      info: "FinTech",
-                      color: Colors.blue,
-                      backgroundColor: Colors.blue[50]!,
-                    ),
-                    InfoPill(
-                      info: "AI",
-                      color: Colors.blue,
-                      backgroundColor: Colors.blue[50]!,
-                    ),
-                  ],
+                  children:
+                      investor.investmentFocus.map((focus) {
+                        return InfoPill(
+                          info: focus,
+                          color: Colors.blue,
+                          backgroundColor: Colors.blue[50]!,
+                        );
+                      }).toList(),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -195,23 +194,14 @@ class InvestorProfileCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Row(
-                  children: [
-                    InfoPill(
-                      info: "Stripe",
-                      color: Colors.grey[800]!,
-                      backgroundColor: Colors.grey[200]!,
-                    ),
-                    InfoPill(
-                      info: "Notion",
-                      color: Colors.grey[800]!,
-                      backgroundColor: Colors.grey[200]!,
-                    ),
-                    InfoPill(
-                      info: "Figma",
-                      color: Colors.grey[800]!,
-                      backgroundColor: Colors.grey[200]!,
-                    ),
-                  ],
+                  children:
+                      investor.pastInvestments.map((investment) {
+                        return InfoPill(
+                          info: investment,
+                          color: Colors.grey[800]!,
+                          backgroundColor: Colors.grey[200]!,
+                        );
+                      }).toList(),
                 ),
                 if (!isFromProfile) ...[
                   const SizedBox(height: 16),
@@ -225,7 +215,7 @@ class InvestorProfileCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "Almost 3 years ago",
+                    investor.activeSince,
                     style: TextStyle(
                       fontSize: 14,
                       height: 1.2,
@@ -235,7 +225,13 @@ class InvestorProfileCard extends StatelessWidget {
 
                   const SizedBox(height: 16),
                   GestureDetector(
-                    onTap: () async {},
+                    onTap: () async {
+                      final Uri params = Uri(
+                        scheme: 'mailto',
+                        path: investor.email,
+                      );
+                      await launchUrl(params);
+                    },
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
