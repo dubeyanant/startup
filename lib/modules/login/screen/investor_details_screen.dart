@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:start_invest/modules/home/screen/home_screen.dart';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:start_invest/utils/shared_prefs_helper.dart';
+import 'package:start_invest/modules/home/screen/home_screen.dart';
 import 'package:start_invest/utils/database_helper.dart'; // Use correct DatabaseHelper
 import 'package:start_invest/modules/login/provider/login_provider.dart'; // Import login provider
-
-// TODO: Import database helper
+import 'package:start_invest/modules/login/provider/user_type_provider.dart'; // Import user type provider
 
 class InvestorDetailsScreen extends ConsumerStatefulWidget {
   final String email;
@@ -102,17 +103,26 @@ class _InvestorDetailsScreenState extends ConsumerState<InvestorDetailsScreen> {
         final id = await _dbHelper.insertNewInvestor(investorData);
         print('Investor inserted with ID: $id');
 
+        await SharedPrefsHelper.instance.saveLoginInfo(
+          widget.email,
+          UserType.investor,
+        );
+
         // Navigate to Home Screen after successful insertion
         if (mounted) {
-          // Set the logged-in user email
+          // Set the logged-in user email in Riverpod state
           ref.read(loggedInUserEmailProvider.notifier).state = widget.email;
+          // Set the user type in Riverpod state
+          ref.read(userTypeProvider.notifier).state = UserType.investor;
 
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(const SnackBar(content: Text('Sign up successful!')));
-          Navigator.pushReplacement(
+          Navigator.pushAndRemoveUntil(
+            // Use pushAndRemoveUntil
             context,
             MaterialPageRoute(builder: (context) => const HomeScreen()),
+            (Route<dynamic> route) => false, // Remove all previous routes
           );
         }
       } catch (e) {

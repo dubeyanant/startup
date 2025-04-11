@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:start_invest/utils/shared_prefs_helper.dart';
+
 import 'package:start_invest/models/founder_model.dart';
 import 'package:start_invest/models/startup_model.dart';
 import 'package:start_invest/modules/home/screen/home_screen.dart';
 import 'package:start_invest/modules/login/provider/login_provider.dart';
+import 'package:start_invest/modules/login/provider/user_type_provider.dart';
 import 'package:start_invest/utils/database_helper.dart';
 
 class StartupDetailsScreen extends ConsumerStatefulWidget {
@@ -170,8 +173,14 @@ class _StartupDetailsScreenState extends ConsumerState<StartupDetailsScreen> {
       // Insert the startup into the database
       await _dbHelper.insertNewStartup(startup, widget.password);
 
-      // Update logged-in state
+      await SharedPrefsHelper.instance.saveLoginInfo(
+        widget.email,
+        UserType.startup,
+      );
+
+      // Update logged-in state in Riverpod
       ref.read(loggedInUserEmailProvider.notifier).state = widget.email;
+      ref.read(userTypeProvider.notifier).state = UserType.startup;
 
       // Navigate to home screen on success
       if (mounted) {

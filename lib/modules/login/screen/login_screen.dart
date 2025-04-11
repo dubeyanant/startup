@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:start_invest/utils/shared_prefs_helper.dart';
 import 'package:start_invest/modules/login/provider/login_provider.dart';
 import 'package:start_invest/modules/login/provider/user_type_provider.dart';
 import 'package:start_invest/modules/home/screen/home_screen.dart';
@@ -14,10 +15,10 @@ class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() => _HomeScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _dbHelper = DatabaseHelper();
 
@@ -166,55 +167,43 @@ class _HomeScreenState extends ConsumerState<LoginScreen> {
                     final userType = ref.read(userTypeProvider);
 
                     if (isLogin) {
+                      dynamic loggedInUser;
                       if (userType == UserType.investor) {
-                        final investor = await _dbHelper.verifyInvestorLogin(
+                        loggedInUser = await _dbHelper.verifyInvestorLogin(
                           email,
                           password,
                         );
-                        if (investor != null) {
-                          ref.read(loggedInUserEmailProvider.notifier).state =
-                              email;
-                          if (mounted) {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const HomeScreen(),
-                              ),
-                            );
-                          }
-                        } else {
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Invalid email or password'),
-                              ),
-                            );
-                          }
+                      } else {
+                        loggedInUser = await _dbHelper.verifyStartupLogin(
+                          email,
+                          password,
+                        );
+                      }
+
+                      if (loggedInUser != null) {
+                        await SharedPrefsHelper.instance.saveLoginInfo(
+                          email,
+                          userType,
+                        );
+
+                        ref.read(loggedInUserEmailProvider.notifier).state =
+                            email;
+
+                        if (mounted) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const HomeScreen(),
+                            ),
+                          );
                         }
                       } else {
-                        final startup = await _dbHelper.verifyStartupLogin(
-                          email,
-                          password,
-                        );
-                        if (startup != null) {
-                          ref.read(loggedInUserEmailProvider.notifier).state =
-                              email;
-                          if (mounted) {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const HomeScreen(),
-                              ),
-                            );
-                          }
-                        } else {
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Invalid email or password'),
-                              ),
-                            );
-                          }
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Invalid email or password'),
+                            ),
+                          );
                         }
                       }
                     } else {
@@ -248,7 +237,6 @@ class _HomeScreenState extends ConsumerState<LoginScreen> {
               ),
               GestureDetector(
                 onTap: () {
-                  // Clear form errors when switching modes
                   _formKey.currentState?.reset();
                   _emailController.clear();
                   _passwordController.clear();

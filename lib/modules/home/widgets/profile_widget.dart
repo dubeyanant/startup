@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:start_invest/utils/shared_prefs_helper.dart';
 import 'package:start_invest/models/investor_model.dart';
 import 'package:start_invest/models/startup_model.dart';
 import 'package:start_invest/modules/home/provider/investor_data_provider.dart';
@@ -62,8 +63,11 @@ class ProfileWidget extends ConsumerWidget {
                     icon: Icons.output,
                     color: Colors.white,
                     textColor: Colors.red,
-                    onTap: () {
+                    onTap: () async {
+                      await SharedPrefsHelper.instance.clearLoginInfo();
+
                       ref.read(loggedInUserEmailProvider.notifier).state = null;
+
                       Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
@@ -131,12 +135,16 @@ class ProfileWidget extends ConsumerWidget {
                           }
 
                           if (rowsDeleted > 0) {
+                            await SharedPrefsHelper.instance.clearLoginInfo();
+
                             ref.read(loggedInUserEmailProvider.notifier).state =
                                 null;
                             if (userType == UserType.investor) {
                               ref.invalidate(investorListProvider);
+                              ref.invalidate(currentInvestorProvider);
                             } else {
                               ref.invalidate(startupListProvider);
+                              ref.invalidate(currentStartupProvider);
                             }
 
                             if (context.mounted) {
