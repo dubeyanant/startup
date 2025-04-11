@@ -87,6 +87,8 @@ class DatabaseHelper {
   Future<void> _populateInitialData(Database db) async {
     await _populateInvestorData(db);
     print("Initial investor data populated.");
+    await _populateStartupData(db);
+    print("Initial startup data populated.");
   }
 
   Future<void> _populateInvestorData(Database db) async {
@@ -117,6 +119,49 @@ class DatabaseHelper {
     }
     await batch.commit(noResult: true);
     print("Investor data population attempt complete.");
+  }
+
+  // Added function to populate startup data from JSON
+  Future<void> _populateStartupData(Database db) async {
+    final String response = await rootBundle.loadString(
+      'assets/startup_data.json',
+    );
+    final List<dynamic> data = json.decode(response);
+
+    Batch batch = db.batch();
+    for (var startupJson in data) {
+      Startup startup = Startup.fromJson(startupJson);
+      Map<String, dynamic> startupMap = startup.toMap();
+      startupMap.remove('id'); // Remove ID for auto-increment
+
+      // Add default password hash and primary email (from first founder)
+      startupMap['password_hash'] = hashPassword('defaultPassword123!');
+      if (startup.founders.isNotEmpty &&
+          startup.founders.first.email.isNotEmpty) {
+        startupMap['email'] = startup.founders.first.email;
+      } else {
+        // Assign a placeholder if no valid founder email exists, although the model requires one
+        startupMap['email'] =
+            'placeholder_startup_${DateTime.now().millisecondsSinceEpoch}@example.com';
+        print(
+          "Warning: Added placeholder email for startup: ${startupMap['name']}",
+        );
+      }
+
+      // Ensure founders list is stored as JSON string
+      if (startupMap['founders'] is List) {
+        startupMap['founders'] = jsonEncode(startupMap['founders']);
+      }
+
+      batch.insert(
+        _startupTableName,
+        startupMap,
+        conflictAlgorithm:
+            ConflictAlgorithm.replace, // Use replace for initial population
+      );
+    }
+    await batch.commit(noResult: true);
+    print("Startup data population attempt complete.");
   }
 
   // Method to get all startups
