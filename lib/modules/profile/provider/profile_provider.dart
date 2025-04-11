@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:start_invest/models/investor_model.dart';
+import 'package:start_invest/models/startup_model.dart';
 import 'package:start_invest/utils/database_helper.dart';
 import 'package:start_invest/modules/login/provider/login_provider.dart';
 
@@ -21,6 +23,21 @@ final currentInvestorProvider = FutureProvider.autoDispose<InvestorModel?>((
     // when getFirstInvestor returned null.
     // Alternatively, fetch the first investor as before if you want a fallback:
     // return await dbHelper.getFirstInvestor();
+    return null;
+  }
+});
+
+// Provider to fetch the profile data for the currently logged-in startup
+final currentStartupProvider = FutureProvider.autoDispose<Startup?>((
+  ref,
+) async {
+  final dbHelper = DatabaseHelper();
+  final loggedInEmail = ref.watch(loggedInUserEmailProvider);
+
+  if (loggedInEmail != null) {
+    // Fetch startup by the first founder's email (adjust logic if needed)
+    return await dbHelper.fetchStartupByEmail(loggedInEmail);
+  } else {
     return null;
   }
 });

@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
-// ignore: depend_on_referenced_packages
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -286,6 +285,56 @@ class DatabaseHelper {
     } catch (e) {
       print("Error deleting investor: $e");
       rethrow;
+    }
+  }
+
+  // Fetch a startup by the email of its first founder
+  // NOTE: This is inefficient and relies on the first founder's email.
+  // Consider adding a dedicated email/user link to the Startup model.
+  Future<Startup?> fetchStartupByEmail(String email) async {
+    Database db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(_startupTableName);
+
+    for (var map in maps) {
+      try {
+        List<dynamic> founderList = jsonDecode(map['founders']);
+        if (founderList.isNotEmpty) {
+          Map<String, dynamic> firstFounder = founderList.first;
+          if (firstFounder.containsKey('email') &&
+              firstFounder['email'] == email) {
+            return Startup.fromMap(map);
+          }
+        }
+      } catch (e) {
+        print("Error parsing founders for startup ID ${map['id']}: $e");
+        // Continue to the next startup if parsing fails for one
+      }
+    }
+    return null; // No startup found with the first founder having this email
+  }
+
+  // Delete a startup by the email of its first founder
+  // NOTE: This relies on the first founder's email.
+  Future<int> deleteStartupByEmail(String email) async {
+    Database db = await database;
+    Startup? startupToDelete = await fetchStartupByEmail(
+      email,
+    ); // Find the startup first
+
+    if (startupToDelete != null && startupToDelete.id != null) {
+      try {
+        return await db.delete(
+          _startupTableName,
+          where: 'id = ?', // Delete by ID once found
+          whereArgs: [startupToDelete.id],
+        );
+      } catch (e) {
+        print("Error deleting startup with ID ${startupToDelete.id}: $e");
+        rethrow;
+      }
+    } else {
+      print("Startup not found for deletion with email: $email");
+      return 0; // Indicate no rows deleted
     }
   }
 

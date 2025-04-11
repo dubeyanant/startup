@@ -7,16 +7,21 @@ import 'package:start_invest/modules/home/widgets/info_pill.dart';
 import 'package:start_invest/utils/currency_conversion.dart';
 
 class StartupProfileCard extends StatelessWidget {
-  const StartupProfileCard({super.key, required this.startup});
+  const StartupProfileCard({
+    super.key,
+    required this.startup,
+    this.isFromProfile = false,
+  });
 
   final Startup startup;
+  final bool isFromProfile;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _StartupDetailCard(startup: startup),
+        _StartupDetailCard(startup: startup, isFromProfile: isFromProfile),
         const SizedBox(height: 16),
         const Text(
           'Founders',
@@ -69,9 +74,13 @@ class StartupProfileCard extends StatelessWidget {
 }
 
 class _StartupDetailCard extends StatelessWidget {
-  const _StartupDetailCard({required this.startup});
+  const _StartupDetailCard({
+    required this.startup,
+    required this.isFromProfile,
+  });
 
   final Startup startup;
+  final bool isFromProfile;
 
   @override
   Widget build(BuildContext context) {
@@ -215,6 +224,23 @@ class _StartupDetailCard extends StatelessWidget {
                     ],
                   ),
                 ),
+                if (isFromProfile) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.mail_outline, color: Colors.grey, size: 16),
+                      const SizedBox(width: 2),
+                      Text(
+                        startup.founders.first.email,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey,
+                          height: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 16),
                 Text(
                   "About",
@@ -252,42 +278,43 @@ class _StartupDetailCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                GestureDetector(
-                  onTap: () async {
-                    final Uri params = Uri(
-                      scheme: 'mailto',
-                      path: startup.founders.first.email,
-                    );
-                    await launchUrl(params);
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.purple,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.message_outlined,
-                          color: Colors.white,
-                          size: 15,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          "Contact Founder",
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
+                if (!isFromProfile)
+                  GestureDetector(
+                    onTap: () async {
+                      final Uri params = Uri(
+                        scheme: 'mailto',
+                        path: startup.founders.first.email,
+                      );
+                      await launchUrl(params);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.purple,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.message_outlined,
                             color: Colors.white,
+                            size: 15,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 8),
+                          Text(
+                            "Contact Founder",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
           ),

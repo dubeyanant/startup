@@ -2,33 +2,60 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:start_invest/models/investor_model.dart';
+import 'package:start_invest/models/startup_model.dart';
+import 'package:start_invest/modules/home/provider/investor_data_provider.dart';
+import 'package:start_invest/modules/home/provider/startup_data_provider.dart';
 import 'package:start_invest/modules/home/widgets/investor_profile_card.dart';
+import 'package:start_invest/modules/home/widgets/startup_profile_card.dart';
 import 'package:start_invest/modules/login/provider/login_provider.dart';
+import 'package:start_invest/modules/login/provider/user_type_provider.dart';
 import 'package:start_invest/modules/login/screen/login_screen.dart';
 import 'package:start_invest/modules/profile/provider/profile_provider.dart';
 import 'package:start_invest/utils/database_helper.dart';
-import 'package:start_invest/modules/home/provider/investor_data_provider.dart';
 
 class ProfileWidget extends ConsumerWidget {
   const ProfileWidget({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final investorAsync = ref.watch(currentInvestorProvider);
+    final userType = ref.watch(userTypeProvider);
+    final loggedInEmail = ref.watch(loggedInUserEmailProvider);
     final dbHelper = DatabaseHelper();
 
+    final profileAsync =
+        userType == UserType.investor
+            ? ref.watch(currentInvestorProvider)
+            : ref.watch(currentStartupProvider);
+
     return Scaffold(
-      body: investorAsync.when(
-        data: (investor) {
-          if (investor == null) {
-            return const Center(child: Text('Investor profile not found.'));
+      body: profileAsync.when(
+        data: (profileData) {
+          if (profileData == null) {
+            return Center(child: Text('${userType.name} profile not found.'));
           }
           return SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  InvestorProfileCard(isFromProfile: true, investor: investor),
+                  if (userType == UserType.investor &&
+                      profileData is InvestorModel)
+                    InvestorProfileCard(
+                      isFromProfile: true,
+                      investor: profileData,
+                    )
+                  else if (userType == UserType.startup &&
+                      profileData is Startup)
+                    StartupProfileCard(
+                      isFromProfile: true,
+                      startup: profileData,
+                    )
+                  else
+                    const Center(
+                      child: Text('Error: Invalid profile data type.'),
+                    ),
+
                   const SizedBox(height: 16),
                   _BottomButton(
                     text: "Sign Out",
@@ -36,11 +63,13 @@ class ProfileWidget extends ConsumerWidget {
                     color: Colors.white,
                     textColor: Colors.red,
                     onTap: () {
-                      Navigator.pushReplacement(
+                      ref.read(loggedInUserEmailProvider.notifier).state = null;
+                      Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const LoginScreen(),
                         ),
+                        (Route<dynamic> route) => false,
                       );
                     },
                     border: Border.all(color: Colors.red, width: 0.4),
@@ -52,8 +81,6 @@ class ProfileWidget extends ConsumerWidget {
                     color: Colors.red,
                     textColor: Colors.white,
                     onTap: () async {
-                      final loggedInEmail = ref.read(loggedInUserEmailProvider);
-
                       if (loggedInEmail == null) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -92,13 +119,26 @@ class ProfileWidget extends ConsumerWidget {
 
                       if (confirmed == true) {
                         try {
-                          final rowsDeleted = await dbHelper
-                              .deleteInvestorByEmail(loggedInEmail);
+                          int rowsDeleted = 0;
+                          if (userType == UserType.investor) {
+                            rowsDeleted = await dbHelper.deleteInvestorByEmail(
+                              loggedInEmail,
+                            );
+                          } else if (userType == UserType.startup) {
+                            rowsDeleted = await dbHelper.deleteStartupByEmail(
+                              loggedInEmail,
+                            );
+                          }
 
                           if (rowsDeleted > 0) {
                             ref.read(loggedInUserEmailProvider.notifier).state =
                                 null;
-                            ref.invalidate(investorListProvider);
+                            if (userType == UserType.investor) {
+                              ref.invalidate(investorListProvider);
+                            } else {
+                              ref.invalidate(startupListProvider);
+                            }
+
                             if (context.mounted) {
                               Navigator.pushAndRemoveUntil(
                                 context,
@@ -118,16 +158,18 @@ class ProfileWidget extends ConsumerWidget {
                           } else {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
+                                SnackBar(
                                   content: Text(
-                                    'Error: Account not found or could not be deleted.',
+                                    'Error: ${userType.name} account not found or could not be deleted.',
                                   ),
                                 ),
                               );
                             }
                           }
                         } catch (e) {
-                          print("Error during account deletion: $e");
+                          print(
+                            "Error during ${userType.name} account deletion: $e",
+                          );
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
@@ -148,8 +190,9 @@ class ProfileWidget extends ConsumerWidget {
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error:
-            (error, stack) =>
-                Center(child: Text('Error loading profile: $error')),
+            (error, stack) => Center(
+              child: Text('Error loading ${userType.name} profile: $error'),
+            ),
       ),
     );
   }
