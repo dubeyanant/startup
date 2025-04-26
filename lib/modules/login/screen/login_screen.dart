@@ -66,7 +66,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     );
                   }
                 },
-                child: Text(isLogin ? "Login" : "Sign Up"),
+                child: Text(
+                  isLogin ? "Login" : "Sign Up",
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
               TextFormField(
                 controller: _emailController,
@@ -159,6 +165,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ],
               ),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(50),
+                  backgroundColor: Theme.of(context).primaryColor,
+                ),
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     final email = _emailController.text;
@@ -233,8 +243,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     }
                   }
                 },
-                child: Text(isLogin ? "Login" : "Sign Up"),
+                child: Text(
+                  isLogin ? "Login" : "Sign Up",
+                  style: TextStyle(color: Theme.of(context).canvasColor),
+                ),
               ),
+              const SizedBox(height: 16),
               GestureDetector(
                 onTap: () {
                   _formKey.currentState?.reset();
@@ -247,6 +261,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   isLogin
                       ? "Click here to create an account"
                       : "Click here to log in if you already have an account",
+                  style: const TextStyle(decoration: TextDecoration.underline),
                 ),
               ),
             ],
