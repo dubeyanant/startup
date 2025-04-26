@@ -422,8 +422,9 @@ class _StartupDetailsScreenState extends ConsumerState<StartupDetailsScreen> {
                       ),
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
-                        if (value == null || value.isEmpty)
+                        if (value == null || value.isEmpty) {
                           return 'Enter founder email';
+                        }
                         if (!RegExp(
                           r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
                         ).hasMatch(value)) {
@@ -434,11 +435,15 @@ class _StartupDetailsScreenState extends ConsumerState<StartupDetailsScreen> {
                     ),
                     const SizedBox(height: 8),
                     ElevatedButton.icon(
-                      icon: const Icon(Icons.add),
-                      label: const Text('Add Founder'),
+                      icon: const Icon(Icons.add, color: Colors.black),
+                      label: Text(
+                        'Add Founder',
+                        style: TextStyle(color: Colors.black),
+                      ),
                       onPressed: _addFounder,
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 36),
+                        backgroundColor: Theme.of(context).primaryColorLight,
                       ), // Make button wider
                     ),
                   ],
@@ -454,6 +459,7 @@ class _StartupDetailsScreenState extends ConsumerState<StartupDetailsScreen> {
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   textStyle: const TextStyle(fontSize: 16),
+                  backgroundColor: Theme.of(context).primaryColor,
                 ),
                 onPressed: _isLoading ? null : _signUpStartup,
                 child:
@@ -466,7 +472,12 @@ class _StartupDetailsScreenState extends ConsumerState<StartupDetailsScreen> {
                             color: Colors.white,
                           ),
                         )
-                        : const Text('Complete Startup Sign Up'),
+                        : Text(
+                          'Complete Startup Sign Up',
+                          style: TextStyle(
+                            color: Theme.of(context).canvasColor,
+                          ),
+                        ),
               ),
             ],
           ),

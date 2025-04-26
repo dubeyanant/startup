@@ -21,26 +21,24 @@ class OverviewWidget extends ConsumerWidget {
             ? 'Find startups to invest in'
             : 'Find investors to fund your startup';
 
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16), // Add some spacing
-            Expanded(
-              // Make the list take available space
-              child:
-                  userType == UserType.investor
-                      ? _buildStartupList(ref)
-                      : _buildInvestorList(ref),
-            ),
-          ],
-        ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16), // Add some spacing
+          Expanded(
+            // Make the list take available space
+            child:
+                userType == UserType.investor
+                    ? _buildStartupList(ref)
+                    : _buildInvestorList(ref),
+          ),
+        ],
       ),
     );
   }

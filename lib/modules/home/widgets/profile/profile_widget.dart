@@ -29,179 +29,167 @@ class ProfileWidget extends ConsumerWidget {
             ? ref.watch(currentInvestorProvider)
             : ref.watch(currentStartupProvider);
 
-    return Scaffold(
-      body: profileAsync.when(
-        data: (profileData) {
-          if (profileData == null) {
-            return Center(child: Text('${userType.name} profile not found.'));
-          }
-          return SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  if (userType == UserType.investor &&
-                      profileData is InvestorModel)
-                    InvestorProfileCard(
-                      isFromProfile: true,
-                      investor: profileData,
-                    )
-                  else if (userType == UserType.startup &&
-                      profileData is Startup)
-                    StartupProfileCard(
-                      isFromProfile: true,
-                      startup: profileData,
-                    )
-                  else
-                    const Center(
-                      child: Text('Error: Invalid profile data type.'),
-                    ),
-
-                  const SizedBox(height: 16),
-                  _BottomButton(
-                    text: "Sign Out",
-                    icon: Icons.output,
-                    color: Colors.white,
-                    textColor: Colors.red,
-                    onTap: () async {
-                      await SharedPrefsHelper.instance.clearLoginInfo();
-
-                      ref.read(loggedInUserEmailProvider.notifier).state = null;
-
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const LoginScreen(),
-                        ),
-                        (Route<dynamic> route) => false,
-                      );
-                    },
-                    border: Border.all(color: Colors.red, width: 0.4),
+    return profileAsync.when(
+      data: (profileData) {
+        if (profileData == null) {
+          return Center(child: Text('${userType.name} profile not found.'));
+        }
+        return SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                if (userType == UserType.investor &&
+                    profileData is InvestorModel)
+                  InvestorProfileCard(
+                    isFromProfile: true,
+                    investor: profileData,
+                  )
+                else if (userType == UserType.startup && profileData is Startup)
+                  StartupProfileCard(isFromProfile: true, startup: profileData)
+                else
+                  const Center(
+                    child: Text('Error: Invalid profile data type.'),
                   ),
-                  const SizedBox(height: 16),
-                  _BottomButton(
-                    text: "Delete Account",
-                    icon: Icons.delete_outline,
-                    color: Colors.red,
-                    textColor: Colors.white,
-                    onTap: () async {
-                      if (loggedInEmail == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Error: Not logged in.'),
-                          ),
-                        );
-                        return;
-                      }
 
-                      final confirmed = await showDialog<bool>(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: const Text('Delete Account?'),
-                            content: const Text(
-                              'Are you sure you want to permanently delete your account?',
-                            ),
-                            actions: <Widget>[
-                              TextButton(
-                                child: const Text('Cancel'),
-                                onPressed:
-                                    () => Navigator.of(context).pop(false),
-                              ),
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                  foregroundColor: Colors.red,
-                                ),
-                                child: const Text('Delete'),
-                                onPressed:
-                                    () => Navigator.of(context).pop(true),
-                              ),
-                            ],
-                          );
-                        },
+                const SizedBox(height: 16),
+                _BottomButton(
+                  text: "Sign Out",
+                  icon: Icons.output,
+                  color: Colors.white,
+                  textColor: Colors.red,
+                  onTap: () async {
+                    await SharedPrefsHelper.instance.clearLoginInfo();
+
+                    ref.read(loggedInUserEmailProvider.notifier).state = null;
+
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginScreen(),
+                      ),
+                      (Route<dynamic> route) => false,
+                    );
+                  },
+                  border: Border.all(color: Colors.red, width: 0.4),
+                ),
+                const SizedBox(height: 16),
+                _BottomButton(
+                  text: "Delete Account",
+                  icon: Icons.delete_outline,
+                  color: Colors.red,
+                  textColor: Colors.white,
+                  onTap: () async {
+                    if (loggedInEmail == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Error: Not logged in.')),
                       );
+                      return;
+                    }
 
-                      if (confirmed == true) {
-                        try {
-                          int rowsDeleted = 0;
-                          if (userType == UserType.investor) {
-                            rowsDeleted = await dbHelper.deleteInvestorByEmail(
-                              loggedInEmail,
-                            );
-                          } else if (userType == UserType.startup) {
-                            rowsDeleted = await dbHelper.deleteStartupByEmail(
-                              loggedInEmail,
-                            );
-                          }
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('Delete Account?'),
+                          content: const Text(
+                            'Are you sure you want to permanently delete your account?',
+                          ),
+                          actions: <Widget>[
+                            TextButton(
+                              child: const Text('Cancel'),
+                              onPressed: () => Navigator.of(context).pop(false),
+                            ),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.red,
+                              ),
+                              child: const Text('Delete'),
+                              onPressed: () => Navigator.of(context).pop(true),
+                            ),
+                          ],
+                        );
+                      },
+                    );
 
-                          if (rowsDeleted > 0) {
-                            await SharedPrefsHelper.instance.clearLoginInfo();
-
-                            ref.read(loggedInUserEmailProvider.notifier).state =
-                                null;
-                            if (userType == UserType.investor) {
-                              ref.invalidate(investorListProvider);
-                              ref.invalidate(currentInvestorProvider);
-                            } else {
-                              ref.invalidate(startupListProvider);
-                              ref.invalidate(currentStartupProvider);
-                            }
-
-                            if (context.mounted) {
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const LoginScreen(),
-                                ),
-                                (Route<dynamic> route) => false,
-                              );
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Account deleted successfully.',
-                                  ),
-                                ),
-                              );
-                            }
-                          } else {
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Error: ${userType.name} account not found or could not be deleted.',
-                                  ),
-                                ),
-                              );
-                            }
-                          }
-                        } catch (e) {
-                          print(
-                            "Error during ${userType.name} account deletion: $e",
+                    if (confirmed == true) {
+                      try {
+                        int rowsDeleted = 0;
+                        if (userType == UserType.investor) {
+                          rowsDeleted = await dbHelper.deleteInvestorByEmail(
+                            loggedInEmail,
                           );
+                        } else if (userType == UserType.startup) {
+                          rowsDeleted = await dbHelper.deleteStartupByEmail(
+                            loggedInEmail,
+                          );
+                        }
+
+                        if (rowsDeleted > 0) {
+                          await SharedPrefsHelper.instance.clearLoginInfo();
+
+                          ref.read(loggedInUserEmailProvider.notifier).state =
+                              null;
+                          if (userType == UserType.investor) {
+                            ref.invalidate(investorListProvider);
+                            ref.invalidate(currentInvestorProvider);
+                          } else {
+                            ref.invalidate(startupListProvider);
+                            ref.invalidate(currentStartupProvider);
+                          }
+
+                          if (context.mounted) {
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const LoginScreen(),
+                              ),
+                              (Route<dynamic> route) => false,
+                            );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Account deleted successfully.'),
+                              ),
+                            );
+                          }
+                        } else {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  'Error deleting account: ${e.toString()}',
+                                  'Error: ${userType.name} account not found or could not be deleted.',
                                 ),
                               ),
                             );
                           }
                         }
+                      } catch (e) {
+                        print(
+                          "Error during ${userType.name} account deletion: $e",
+                        );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Error deleting account: ${e.toString()}',
+                              ),
+                            ),
+                          );
+                        }
                       }
-                    },
-                  ),
-                ],
-              ),
+                    }
+                  },
+                ),
+              ],
             ),
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error:
-            (error, stack) => Center(
-              child: Text('Error loading ${userType.name} profile: $error'),
-            ),
-      ),
+          ),
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error:
+          (error, stack) => Center(
+            child: Text('Error loading ${userType.name} profile: $error'),
+          ),
     );
   }
 }

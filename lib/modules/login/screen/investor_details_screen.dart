@@ -187,14 +187,15 @@ class _InvestorDetailsScreenState extends ConsumerState<InvestorDetailsScreen> {
                     child: TextFormField(
                       controller: _minInvestmentController,
                       decoration: const InputDecoration(
-                        labelText: 'Min Investment (\$)',
+                        labelText: 'Min Investment (₹)',
                       ),
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       validator: (value) {
                         if (value == null || value.isEmpty) return 'Required';
-                        if (int.tryParse(value) == null)
+                        if (int.tryParse(value) == null) {
                           return 'Invalid number';
+                        }
                         return null;
                       },
                     ),
@@ -204,7 +205,7 @@ class _InvestorDetailsScreenState extends ConsumerState<InvestorDetailsScreen> {
                     child: TextFormField(
                       controller: _maxInvestmentController,
                       decoration: const InputDecoration(
-                        labelText: 'Max Investment (\$)',
+                        labelText: 'Max Investment (₹)',
                       ),
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -265,12 +266,17 @@ class _InvestorDetailsScreenState extends ConsumerState<InvestorDetailsScreen> {
                         value == null || value.isEmpty
                             ? 'Please enter when you started'
                             : null,
-                // TODO: Add date validation or use a DatePicker
               ),
               const SizedBox(height: 24),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                ),
                 onPressed: _submitInvestorDetails,
-                child: const Text('Complete Sign Up'),
+                child: Text(
+                  'Complete Sign Up',
+                  style: TextStyle(color: Theme.of(context).canvasColor),
+                ),
               ),
             ],
           ),
