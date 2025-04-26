@@ -335,14 +335,16 @@ class _StartupDetailsScreenState extends ConsumerState<StartupDetailsScreen> {
               TextFormField(
                 controller: _fundingGoalController,
                 decoration: const InputDecoration(
-                  labelText: 'Funding Goal (USD)',
+                  labelText: 'Funding Goal (INR)',
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
-                  if (value == null || value.isEmpty)
+                  if (value == null || value.isEmpty) {
                     return 'Enter funding goal';
-                  if (int.tryParse(value) == null)
+                  }
+                  if (int.tryParse(value) == null) {
                     return 'Enter a valid number';
+                  }
                   return null;
                 },
               ),
