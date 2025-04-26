@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:start_invest/modules/home/widgets/overview_widget.dart';
-import 'package:start_invest/modules/home/widgets/profile_widget.dart';
+import 'package:start_invest/modules/home/widgets/overview/overview_widget.dart';
+import 'package:start_invest/modules/home/widgets/profile/profile_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

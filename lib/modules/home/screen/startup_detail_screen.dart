@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:start_invest/modules/home/widgets/startup_profile_card.dart';
+import 'package:start_invest/modules/home/widgets/profile/startup_profile_card.dart';
 import 'package:start_invest/models/startup_model.dart';
 
 class StartupDetailScreen extends StatelessWidget {

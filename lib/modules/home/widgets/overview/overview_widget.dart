@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:start_invest/modules/home/provider/investor_data_provider.dart';
 import 'package:start_invest/modules/home/provider/startup_data_provider.dart';
-import 'package:start_invest/modules/home/widgets/investor_card.dart';
-import 'package:start_invest/modules/home/widgets/startup_card.dart';
+import 'package:start_invest/modules/home/widgets/overview/investor_card.dart';
+import 'package:start_invest/modules/home/widgets/overview/startup_card.dart';
 import 'package:start_invest/modules/login/provider/user_type_provider.dart';
 
 class OverviewWidget extends ConsumerWidget {

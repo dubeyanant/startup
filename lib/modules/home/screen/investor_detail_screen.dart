@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:start_invest/models/investor_model.dart';
-import 'package:start_invest/modules/home/widgets/investor_profile_card.dart';
+import 'package:start_invest/modules/home/widgets/profile/investor_profile_card.dart';
 
 class InvestorDetailScreen extends StatelessWidget {
   const InvestorDetailScreen(this.investor, {super.key});
